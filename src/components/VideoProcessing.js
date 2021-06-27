@@ -1,0 +1,154 @@
+import {LogLevel, RNFFmpeg, RNFFmpegConfig} from 'react-native-ffmpeg';
+import {FOLDER_NAME, sleep} from './Utility';
+
+const Qualities = {
+  fast: '-c copy -avoid_negative_ts 1',
+  highp: '',
+};
+
+// Function to split video
+export const splitVideo = async (mediaObj, setPercentage, quality) => {
+  const RNFS = require('react-native-fs');
+
+  // Get dirs
+  const workingDir = await setupWorkingDirectory(RNFS);
+  const outputDir = await getNewOutputDirName(RNFS, workingDir);
+
+  // Get File path from uri
+  const filePath = (await RNFS.stat(mediaObj.uri)).originalFilepath;
+
+  let timeLeft = parseFloat(mediaObj.duration);
+  let id = 1;
+  const tickSize = 100.0 / calcSplits(timeLeft);
+  setPercentage(0);
+
+  while (timeLeft > 0) {
+    const result = await splitVideoBatch(
+      {
+        batchSize: 8,
+        splitDuration: 30,
+        timeLeft: timeLeft,
+        id: id,
+        tickSize: tickSize,
+      },
+      filePath,
+      outputDir,
+      setPercentage,
+      quality,
+    );
+
+    timeLeft = result.timeLeft;
+    id = result.id;
+  }
+
+  const splitCount = calcSplits(mediaObj.duration);
+  generateThumbnailsForSplits(splitCount, outputDir);
+};
+
+const calcSplits = (duration, splitDuration = 30) => {
+  duration = parseInt(duration, 10);
+  let splits = parseInt(duration / splitDuration, 10);
+  if (duration % splitDuration !== 0) {
+    splits += 1;
+  }
+
+  return splits;
+};
+
+// Function to split videos
+const splitVideoBatch = async (data, file, outputDir, setProgress, quality) => {
+  let {batchSize, splitDuration, timeLeft, id} = data;
+  let partsProcessed = 0;
+
+  RNFFmpegConfig.disableLogs();
+
+  while (timeLeft > 0 && batchSize > 0) {
+    const period = Math.min(splitDuration, timeLeft);
+    const outputFile = `${outputDir}/${id}.mp4`;
+
+    const from = splitDuration * (id - 1);
+    const params = Qualities[quality];
+    const command = `-ss ${from} -i "${file}" -t ${period} ${params} ${outputFile}`;
+
+    partsProcessed += 1;
+    console.log(`Processing part ${partsProcessed}/${batchSize}`);
+
+    await RNFFmpeg.executeAsync(command, completedExecution => {
+      if (completedExecution.returnCode === 0) {
+        console.log('FFmpeg process completed successfully');
+      } else {
+        console.log(
+          `FFmpeg process failed with rc=${completedExecution.returnCode}.`,
+        );
+      }
+
+      partsProcessed -= 1;
+      console.log(`Completed part ${batchSize - partsProcessed}/${batchSize}`);
+
+      setProgress(prevState => {
+        console.log('Total Progress : ' + (prevState + data.tickSize));
+        return prevState + data.tickSize;
+      });
+    });
+
+    timeLeft -= period;
+    id += 1;
+    batchSize -= 1;
+  }
+
+  // Wait for completion
+  while (partsProcessed !== 0) {
+    await sleep(500);
+  }
+
+  return {timeLeft, id};
+};
+
+const setupWorkingDirectory = async RNFS => {
+  try {
+    await RNFS.mkdir(RNFS.ExternalStorageDirectoryPath + '/' + FOLDER_NAME);
+    return RNFS.ExternalStorageDirectoryPath + '/' + FOLDER_NAME;
+  } catch (e) {
+    console.log('Fatal Error Setting up Folder');
+  }
+};
+
+const getNewOutputDirName = async (RNFS, workingDir) => {
+  const files = await RNFS.readdir(workingDir);
+  console.log('Files are -> ');
+  console.log(files);
+
+  let maxNum = 0;
+  for (let i of files) {
+    const num = parseInt(i, 10);
+    if (num && num > maxNum) {
+      maxNum = num;
+    }
+  }
+
+  maxNum += 1;
+
+  await RNFS.mkdir(workingDir + '/' + maxNum);
+  return workingDir + '/' + maxNum;
+};
+
+const generateThumbnailsForSplits = (splitCount, outputDir) => {
+  for (let i = 1; i <= splitCount; i++) {
+    console.log('Generating thumb for ' + i);
+    genThumbnail(`${outputDir}/${i}.mp4`, outputDir, i + '.png');
+  }
+};
+
+const genThumbnail = (filePath, outputDir, outputFileName = 'thumb.png') => {
+  const command = `-i ${filePath} -ss 00:00:01.000 -vframes 1 ${outputDir}/${outputFileName}`;
+
+  RNFFmpeg.executeAsync(command, completedExecution => {
+    if (completedExecution.returnCode === 0) {
+      console.log('Made video tumbnail');
+    } else {
+      console.log(
+        `Thumbnail failed: FFmpeg process failed with rc=${completedExecution.returnCode}.`,
+      );
+    }
+  });
+};
