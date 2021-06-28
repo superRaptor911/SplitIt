@@ -10,7 +10,7 @@ set shortmess=aoO
 badd +12 ~/program/reactnative/VideoSplitter/App.js
 badd +52 screens/Home.js
 badd +58 components/Utility.js
-badd +127 components/VideoProcessing.js
+badd +1 components/VideoProcessing.js
 badd +19 navigation/HomeStack.js
 badd +18 components/HomeHeader.js
 badd +24 components/HomeButtons.js
@@ -24,10 +24,10 @@ badd +19 components/viewCreation/Splits.js
 badd +12 components/viewCreation/SplitedVideos.js
 badd +2 components/viewCreation/VideoMgmt.js
 badd +1 components/QualitySelectOverlay.js
-badd +45 screens/AboutPage.js
+badd +37 screens/AboutPage.js
 argglobal
 %argdel
-edit screens/AboutPage.js
+edit components/VideoProcessing.js
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -37,12 +37,12 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-let s:l = 27 - ((10 * winheight(0) + 22) / 45)
+let s:l = 1 - ((0 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-27
-normal! 068|
+1
+normal! 09|
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

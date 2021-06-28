@@ -1,4 +1,4 @@
-import {LogLevel, RNFFmpeg, RNFFmpegConfig} from 'react-native-ffmpeg';
+import {RNFFmpeg, RNFFmpegConfig} from 'react-native-ffmpeg';
 import {FOLDER_NAME, sleep} from './Utility';
 
 const Qualities = {
@@ -42,7 +42,12 @@ export const splitVideo = async (mediaObj, setPercentage, quality) => {
   }
 
   const splitCount = calcSplits(mediaObj.duration);
-  generateThumbnailsForSplits(splitCount, outputDir);
+  generateThumbnailsForSplits(
+    splitCount,
+    outputDir,
+    setPercentage,
+    tickSize / 10,
+  );
 };
 
 const calcSplits = (duration, splitDuration = 30) => {
@@ -86,8 +91,9 @@ const splitVideoBatch = async (data, file, outputDir, setProgress, quality) => {
       console.log(`Completed part ${batchSize - partsProcessed}/${batchSize}`);
 
       setProgress(prevState => {
-        console.log('Total Progress : ' + (prevState + data.tickSize));
-        return prevState + data.tickSize;
+        const totalProgress = Math.min(90, prevState + data.tickSize);
+        console.log('Total Progress : ' + totalProgress);
+        return totalProgress;
       });
     });
 
@@ -132,14 +138,31 @@ const getNewOutputDirName = async (RNFS, workingDir) => {
   return workingDir + '/' + maxNum;
 };
 
-const generateThumbnailsForSplits = (splitCount, outputDir) => {
+const generateThumbnailsForSplits = (
+  splitCount,
+  outputDir,
+  setProgress,
+  tickSize,
+) => {
   for (let i = 1; i <= splitCount; i++) {
     console.log('Generating thumb for ' + i);
-    genThumbnail(`${outputDir}/${i}.mp4`, outputDir, i + '.png');
+    genThumbnail(
+      `${outputDir}/${i}.mp4`,
+      outputDir,
+      i + '.png',
+      setProgress,
+      tickSize,
+    );
   }
 };
 
-const genThumbnail = (filePath, outputDir, outputFileName = 'thumb.png') => {
+const genThumbnail = (
+  filePath,
+  outputDir,
+  outputFileName,
+  setProgress,
+  tickSize,
+) => {
   const command = `-i ${filePath} -ss 00:00:01.000 -vframes 1 ${outputDir}/${outputFileName}`;
 
   RNFFmpeg.executeAsync(command, completedExecution => {
@@ -150,5 +173,11 @@ const genThumbnail = (filePath, outputDir, outputFileName = 'thumb.png') => {
         `Thumbnail failed: FFmpeg process failed with rc=${completedExecution.returnCode}.`,
       );
     }
+
+    setProgress(prevState => {
+      const totalProgress = prevState + tickSize;
+      console.log('Total Progress : ' + totalProgress);
+      return totalProgress;
+    });
   });
 };
