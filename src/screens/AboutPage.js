@@ -24,7 +24,7 @@ const AboutPage = ({navigation}) => {
       <Text
         style={styles.linkText}
         onPress={() => {
-          Linking.openURL('');
+          Linking.openURL('https://github.com/superRaptor911/SplitIt');
         }}>
         This application is free and open source.
       </Text>

@@ -8,25 +8,26 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +12 ~/program/reactnative/VideoSplitter/App.js
-badd +38 screens/Home.js
+badd +52 screens/Home.js
 badd +58 components/Utility.js
 badd +127 components/VideoProcessing.js
-badd +17 navigation/HomeStack.js
-badd +39 components/HomeHeader.js
+badd +19 navigation/HomeStack.js
+badd +18 components/HomeHeader.js
 badd +24 components/HomeButtons.js
 badd +1 components/ProgressOverlay.js
 badd +3 styles/Global.js
-badd +7 screens/Creations.js
+badd +16 screens/Creations.js
 badd +11 components/HeaderWithBackButton.js
 badd +89 components/CreationsList.js
 badd +32 screens/ViewCreation.js
 badd +19 components/viewCreation/Splits.js
 badd +12 components/viewCreation/SplitedVideos.js
-badd +3 components/viewCreation/VideoMgmt.js
+badd +2 components/viewCreation/VideoMgmt.js
 badd +1 components/QualitySelectOverlay.js
+badd +45 screens/AboutPage.js
 argglobal
 %argdel
-edit components/viewCreation/VideoMgmt.js
+edit screens/AboutPage.js
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -35,28 +36,13 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '2resize ' . ((&lines * 1 + 23) / 47)
-exe 'vert 2resize ' . ((&columns * 1 + 87) / 174)
-exe '3resize ' . ((&lines * 1 + 23) / 47)
-exe 'vert 3resize ' . ((&columns * 69 + 87) / 174)
 argglobal
-let s:l = 2 - ((1 * winheight(0) + 22) / 45)
+let s:l = 27 - ((10 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2
-normal! 0
-wincmd w
-argglobal
-enew
-wincmd w
-argglobal
-enew
-wincmd w
-exe '2resize ' . ((&lines * 1 + 23) / 47)
-exe 'vert 2resize ' . ((&columns * 1 + 87) / 174)
-exe '3resize ' . ((&lines * 1 + 23) / 47)
-exe 'vert 3resize ' . ((&columns * 69 + 87) / 174)
+27
+normal! 068|
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
