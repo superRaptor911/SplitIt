@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {ButtonGroup, CheckBox, Icon, Image} from 'react-native-elements';
+import {getRandomString} from '../Utility';
+import NothingSelectedPopup from './NothingSelectedPopup';
 import {
   deleteVideos,
   getTimeFromID,
@@ -15,7 +17,9 @@ const genVideoList = async videoID => {
     arr.push({
       element: () => (
         <Image
-          source={{uri: 'file://' + images.path + '/' + item + '.png'}}
+          source={{
+            uri: 'file://' + images.path + '/' + item + '.png',
+          }}
           containerStyle={styles.images}>
           <View style={styles.videoDetails}>
             <Icon name="videocam" color="white" />
@@ -46,6 +50,7 @@ const SplitedVideos = ({videoID, buttonStates, navigation}) => {
   const [buttons, setButtons] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [videoListChanged, setVideoListChanged] = useState(0);
+  const [popupVisible, setPopupVisible] = useState(false);
 
   useEffect(() => {
     genVideoList(videoID).then(result => {
@@ -54,6 +59,15 @@ const SplitedVideos = ({videoID, buttonStates, navigation}) => {
   }, [videoID, videoListChanged]);
 
   useEffect(() => {
+    if (buttonStates.deletePressed || buttonStates.sharePressed) {
+      if (selectedItems.length === 0) {
+        setPopupVisible(true);
+        buttonStates.setDeletePressed(false);
+        buttonStates.setSharePressed(false);
+        return;
+      }
+    }
+
     if (buttonStates.deletePressed) {
       deleteVideos(videoID, selectedItems).then(nothingLeft => {
         if (nothingLeft) {
@@ -78,6 +92,7 @@ const SplitedVideos = ({videoID, buttonStates, navigation}) => {
     setSelectedItems(itemIDs);
   };
 
+  console.log('Rendering .....');
   return (
     <View>
       <CheckBox
@@ -102,6 +117,10 @@ const SplitedVideos = ({videoID, buttonStates, navigation}) => {
         buttonContainerStyle={styles.buttonContainer}
         selectedButtonStyle={styles.slectedItemStyle}
         underlayColor="red"
+      />
+      <NothingSelectedPopup
+        isVisible={popupVisible}
+        setIsVisible={setPopupVisible}
       />
     </View>
   );

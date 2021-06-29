@@ -9,7 +9,12 @@ import {
 } from 'react-native';
 import {Image} from 'react-native-elements';
 import {COLORS} from '../styles/Global';
-import {FOLDER_NAME, getWorkingDirectory, sortStringNums} from './Utility';
+import {
+  FOLDER_NAME,
+  getRandomString,
+  getWorkingDirectory,
+  sortStringNums,
+} from './Utility';
 
 const styles = StyleSheet.create({
   root: {
@@ -71,14 +76,16 @@ const genCreationList = async navigation => {
   const images = await getCreationList();
   return (
     <View style={styles.root}>
-      {images.map((img, id) => (
+      {images.reverse().map((img, id) => (
         <View key={id} style={styles.imageContainer}>
           <TouchableOpacity
             onPress={() => {
               navigation.push('ViewCreation', {videoID: img.id});
             }}>
             <Image
-              source={{uri: 'file://' + img.imgPath}}
+              source={{
+                uri: 'file://' + img.imgPath,
+              }}
               style={styles.image}
             />
           </TouchableOpacity>

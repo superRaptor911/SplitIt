@@ -37,6 +37,7 @@ export const deleteVideos = async (videoID, Ids) => {
 
   if (files.length === Ids.length) {
     await RNFS.unlink(workingDir + '/' + videoID);
+    await RNFS.mkdir(workingDir + '/' + videoID);
     return true;
   }
 

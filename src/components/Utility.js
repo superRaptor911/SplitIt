@@ -25,8 +25,8 @@ export const getRWPermission = async () => {
     granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
       {
-        title: 'I NEED READ PERMISSION',
-        message: 'PLZ',
+        title: 'NEED READ PERMISSION',
+        message: 'This app needs read and write permission to work',
         buttonNeutral: 'Ask Me Later',
         buttonNegative: 'Cancel',
         buttonPositive: 'OK',
@@ -68,4 +68,8 @@ export function getExtension(filename) {
 export function getWorkingDirectory() {
   const workingDir = RNFS.ExternalStorageDirectoryPath + '/' + FOLDER_NAME;
   return workingDir;
+}
+
+export function getRandomString() {
+  return '?random=' + Math.random().toString(36).substring(7);
 }
