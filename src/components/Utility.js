@@ -66,7 +66,7 @@ export function getExtension(filename) {
 }
 
 export function getWorkingDirectory() {
-  const workingDir = RNFS.ExternalStorageDirectoryPath + '/' + FOLDER_NAME;
+  const workingDir = RNFS.ExternalDirectoryPath + '/' + FOLDER_NAME;
   return workingDir;
 }
 
