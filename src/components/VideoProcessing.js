@@ -1,5 +1,7 @@
 import {RNFFmpeg, RNFFmpegConfig} from 'react-native-ffmpeg';
-import {FOLDER_NAME, sleep} from './Utility';
+import {FOLDER_NAME, getWorkingDirectory, sleep} from './Utility';
+
+const RNFS = require('react-native-fs');
 
 const Qualities = {
   fast: '-c copy -avoid_negative_ts 1',
@@ -8,14 +10,13 @@ const Qualities = {
 
 // Function to split video
 export const splitVideo = async (mediaObj, setPercentage, quality) => {
-  const RNFS = require('react-native-fs');
-
   // Get dirs
+  console.log('Going to process File : ' + mediaObj.uri);
   const workingDir = await setupWorkingDirectory(RNFS);
   const outputDir = await getNewOutputDirName(RNFS, workingDir);
 
   // Get File path from uri
-  const filePath = (await RNFS.stat(mediaObj.uri)).originalFilepath;
+  const filePath = await getMediaPath(mediaObj);
 
   let timeLeft = parseFloat(mediaObj.duration);
   let id = 1;
@@ -48,6 +49,30 @@ export const splitVideo = async (mediaObj, setPercentage, quality) => {
     setPercentage,
     tickSize / 10,
   );
+};
+
+const getMediaPath = async mediaObj => {
+  let filePath = '';
+  try {
+    filePath = (await RNFS.stat(mediaObj.uri)).originalFilepath;
+    console.log('Going to process File : ' + filePath);
+  } catch (e) {
+    console.log('Error::VideoProcessing::Unable to get File path');
+    console.log(e);
+    console.log('Trying to Fix this issue');
+
+    try {
+      const destPath = `${RNFS.TemporaryDirectoryPath}/temp`;
+      await RNFS.copyFile(mediaObj.uri, destPath);
+      filePath = (await RNFS.stat(destPath)).originalFilepath;
+      console.log('Going to process File : ' + filePath);
+    } catch (err) {
+      console.log('-------------Fix failed----------');
+      console.log(err);
+    }
+  }
+
+  return filePath;
 };
 
 const calcSplits = (duration, splitDuration = 30) => {
@@ -112,8 +137,8 @@ const splitVideoBatch = async (data, file, outputDir, setProgress, quality) => {
 
 const setupWorkingDirectory = async RNFS => {
   try {
-    await RNFS.mkdir(RNFS.ExternalStorageDirectoryPath + '/' + FOLDER_NAME);
-    return RNFS.ExternalStorageDirectoryPath + '/' + FOLDER_NAME;
+    await RNFS.mkdir(getWorkingDirectory());
+    return getWorkingDirectory();
   } catch (e) {
     console.log('Fatal Error Setting up Folder');
   }
