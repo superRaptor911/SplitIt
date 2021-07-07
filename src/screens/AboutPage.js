@@ -37,17 +37,6 @@ const AboutPage = ({navigation}) => {
       <View style={styles.box}>
         <Text style={styles.boxText}>Version 1.0</Text>
       </View>
-      <View style={styles.box}>
-        <Text style={styles.boxText}>Donate</Text>
-        <Text
-          style={styles.donationText}
-          onPress={() => {
-            Clipboard.setString('raptorinc@icici');
-            ToastAndroid.show('UPI id copied', ToastAndroid.SHORT);
-          }}>
-          UPI : raptorinc@icici
-        </Text>
-      </View>
     </View>
   );
 };

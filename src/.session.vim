@@ -8,9 +8,9 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +12 ~/program/reactnative/VideoSplitter/App.js
-badd +52 screens/Home.js
-badd +74 components/Utility.js
-badd +67 components/VideoProcessing.js
+badd +45 screens/Home.js
+badd +69 components/Utility.js
+badd +3 components/VideoProcessing.js
 badd +19 navigation/HomeStack.js
 badd +18 components/HomeHeader.js
 badd +24 components/HomeButtons.js
@@ -22,13 +22,13 @@ badd +76 components/CreationsList.js
 badd +32 screens/ViewCreation.js
 badd +19 components/viewCreation/Splits.js
 badd +66 components/viewCreation/SplitedVideos.js
-badd +40 components/viewCreation/VideoMgmt.js
+badd +1 components/viewCreation/VideoMgmt.js
 badd +1 components/QualitySelectOverlay.js
 badd +37 screens/AboutPage.js
 badd +21 components/viewCreation/NothingSelectedPopup.js
 argglobal
 %argdel
-edit components/viewCreation/VideoMgmt.js
+edit components/Utility.js
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -38,11 +38,11 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-let s:l = 40 - ((10 * winheight(0) + 22) / 45)
+let s:l = 69 - ((38 * winheight(0) + 22) / 45)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-40
+69
 normal! 047|
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
